@@ -13,7 +13,7 @@
         "laravel/framework": "^13.17",
         "laravel/tinker": "^3.0",
         "pcteckserv/cms-contact-forms": "*@dev",
-        "pcteckserv/cms-core": "2.*"
+        "pcteckserv/cms-core": "^2.15"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -47,7 +47,7 @@
         },
         {
             "type": "git",
-            "url": "https://github.com/diogoleitean/pcteckcms_core.git"
+            "url": "https://github.com/pcteckserv/cmspcteckserv-coredl.git"
         }
     ],
     "scripts": {

@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Deployment;
 
-use App\Services\DeploymentPackageBuilder;
+use Pcteckserv\CmsCore\Services\DeploymentPackageBuilder;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -26,11 +26,9 @@ class DeploymentPackageContentsTest extends TestCase
         $this->originalStorage = storage_path();
         $this->directory = sys_get_temp_dir().'/deployment-package-'.bin2hex(random_bytes(8));
         $files = new Filesystem;
-        foreach (['resources/installer', 'app/Services/Deployment', 'storage/app/public/cms/media', 'database', 'public'] as $path) {
+        foreach (['storage/app/public/cms/media', 'database', 'public'] as $path) {
             $files->ensureDirectoryExists($this->directory.'/'.$path);
         }
-        $files->copy(resource_path('installer/installer.php.stub'), $this->directory.'/resources/installer/installer.php.stub');
-        $files->copy(app_path('Services/Deployment/DatabaseSnapshot.php'), $this->directory.'/app/Services/Deployment/DatabaseSnapshot.php');
         $files->put($this->directory.'/public/index.php', '<?php');
         $files->put($this->directory.'/storage/app/public/cms/media/imagem.txt', 'media de teste');
         $files->put($this->directory.'/.env', 'NAO_INCLUIR=exemplo');

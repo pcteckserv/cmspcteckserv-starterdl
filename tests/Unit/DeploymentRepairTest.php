@@ -2,7 +2,7 @@
 
 namespace Tests\Unit;
 
-use App\Services\DeploymentPackageBuilder;
+use Pcteckserv\CmsCore\Services\DeploymentPackageBuilder;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Process\Process;
@@ -50,7 +50,7 @@ class DeploymentRepairTest extends TestCase
         $source = str_replace(
             ['{{ password_hash }}', '{{ expires_at }}', '{{ composer_payload }}', '{{ composer_checksum }}'],
             [var_export($this->passwordHash, true), (string) ($expiry ?? time() + 3600), base64_encode($composer), hash('sha256', $composer)],
-            file_get_contents(resource_path('installer/repair.php.stub')),
+            file_get_contents(dirname((new \ReflectionClass(\Pcteckserv\CmsCore\Services\DeploymentPackageBuilder::class))->getFileName(), 3).'/resources/installer/repair.php.stub'),
         );
         file_put_contents($this->directory.'/public/repair.php', $source);
     }

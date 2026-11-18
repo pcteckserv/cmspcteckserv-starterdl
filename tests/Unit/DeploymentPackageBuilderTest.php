@@ -2,7 +2,7 @@
 
 namespace Tests\Unit;
 
-use App\Services\DeploymentPackageBuilder;
+use Pcteckserv\CmsCore\Services\DeploymentPackageBuilder;
 use Illuminate\Filesystem\Filesystem;
 use ReflectionClass;
 use Tests\TestCase;
@@ -64,7 +64,16 @@ class DeploymentPackageBuilderTest extends TestCase
         $builder = new DeploymentPackageBuilder(new Filesystem());
         $useBuildFallback = (new ReflectionClass($builder))->getMethod('useBuildFallback');
 
-        $this->assertTrue($useBuildFallback->invoke($builder, 'npm run build'));
+        $directory = 'storage/framework/testing/build-fallback-'.bin2hex(random_bytes(4));
+        $files = new Filesystem;
+        $files->ensureDirectoryExists(base_path($directory));
+        $files->put(base_path($directory.'/manifest.json'), '{}');
+        config()->set('deploy.build_fallbacks', ['npm run build' => $directory.'/manifest.json']);
+        try {
+            $this->assertTrue($useBuildFallback->invoke($builder, 'npm run build'));
+        } finally {
+            $files->deleteDirectory(base_path($directory));
+        }
         $this->assertFalse($useBuildFallback->invoke($builder, 'php artisan optimize'));
     }
 
@@ -92,7 +101,7 @@ class DeploymentPackageBuilderTest extends TestCase
 
     public function test_installer_prepara_as_pastas_gravaveis_do_laravel(): void
     {
-        $stub = file_get_contents(resource_path('installer/installer.php.stub'));
+        $stub = file_get_contents(dirname((new \ReflectionClass(\Pcteckserv\CmsCore\Services\DeploymentPackageBuilder::class))->getFileName(), 3).'/resources/installer/installer.php.stub');
 
         $this->assertStringContainsString("'bootstrap/cache'", $stub);
         $this->assertStringContainsString("'storage/framework/cache'", $stub);
@@ -104,7 +113,7 @@ class DeploymentPackageBuilderTest extends TestCase
 
     public function test_installer_exige_opcao_explicita_para_limpar_a_base_de_dados(): void
     {
-        $stub = file_get_contents(resource_path('installer/installer.php.stub'));
+        $stub = file_get_contents(dirname((new \ReflectionClass(\Pcteckserv\CmsCore\Services\DeploymentPackageBuilder::class))->getFileName(), 3).'/resources/installer/installer.php.stub');
 
         $this->assertStringContainsString("installer_value('reset_database') === '1'", $stub);
         $this->assertStringContainsString("['migrate:fresh', '--force']", $stub);
@@ -112,20 +121,10 @@ class DeploymentPackageBuilderTest extends TestCase
         $this->assertStringContainsString('Elimina todas as tabelas existentes.', $stub);
     }
 
-    public function test_inclui_pacotes_locais_configurados_no_deploy(): void
+    public function test_configuracao_comum_e_fornecida_pelo_core(): void
     {
-        $this->assertSame('../pcteckcms_core', config('deploy.local_package_overlays.pcteckserv/cms-core'));
-        $this->assertDirectoryExists(base_path('../pcteckcms_core'));
-
-        $builder = new DeploymentPackageBuilder(new Filesystem());
-        $copies = (new ReflectionClass($builder))->getMethod('pathRepositoryCopies')->invoke($builder);
-        $core = collect($copies)->firstWhere('destination', 'vendor/pcteckserv/cms-core');
-        $pluginSource = collect($copies)->firstWhere('destination', 'packages/pcteckserv/cms-contact-forms');
-
-        $this->assertNotNull($core);
-        $this->assertSame(realpath(base_path('../pcteckcms_core')), $core['source']);
-        $this->assertNotNull($pluginSource);
-        $this->assertDirectoryExists($pluginSource['source']);
+        $this->assertSame([], config('deploy.local_package_overlays'));
+        $this->assertSame(3, config('deploy.build_attempts'));
     }
 
     public function test_localiza_um_composer_phar_valido_para_o_deploy(): void
@@ -140,7 +139,7 @@ class DeploymentPackageBuilderTest extends TestCase
 
     public function test_installer_remove_os_ficheiros_de_deploy_apos_sucesso(): void
     {
-        $stub = file_get_contents(resource_path('installer/installer.php.stub'));
+        $stub = file_get_contents(dirname((new \ReflectionClass(\Pcteckserv\CmsCore\Services\DeploymentPackageBuilder::class))->getFileName(), 3).'/resources/installer/installer.php.stub');
 
         $this->assertStringContainsString('function installer_remove_deployment_files', $stub);
         $this->assertStringContainsString('$publicPath.DIRECTORY_SEPARATOR.$archiveName', $stub);
@@ -150,7 +149,7 @@ class DeploymentPackageBuilderTest extends TestCase
 
     public function test_installer_serializa_o_env_com_booleanos_e_escaping_seguros(): void
     {
-        $stub = file_get_contents(resource_path('installer/installer.php.stub'));
+        $stub = file_get_contents(dirname((new \ReflectionClass(\Pcteckserv\CmsCore\Services\DeploymentPackageBuilder::class))->getFileName(), 3).'/resources/installer/installer.php.stub');
 
         $this->assertStringContainsString("'APP_DEBUG' => false", $stub);
         $this->assertStringContainsString('if (is_bool($value))', $stub);
@@ -160,7 +159,7 @@ class DeploymentPackageBuilderTest extends TestCase
 
         $_SERVER['REQUEST_METHOD'] = 'GET';
         ob_start();
-        include resource_path('installer/installer.php.stub');
+        include dirname((new \ReflectionClass(\Pcteckserv\CmsCore\Services\DeploymentPackageBuilder::class))->getFileName(), 3).'/resources/installer/installer.php.stub';
         ob_end_clean();
 
         $password = 'abc$def\\ghi"jkl';
@@ -178,7 +177,7 @@ class DeploymentPackageBuilderTest extends TestCase
     public function test_installer_configura_a_pasta_publica_real_no_bootstrap(): void
     {
         $bootstrap = file_get_contents(base_path('bootstrap/app.php'));
-        $installer = file_get_contents(resource_path('installer/installer.php.stub'));
+        $installer = file_get_contents(dirname((new \ReflectionClass(\Pcteckserv\CmsCore\Services\DeploymentPackageBuilder::class))->getFileName(), 3).'/resources/installer/installer.php.stub');
 
         $this->assertStringContainsString("__DIR__.'/public_path.php'", $bootstrap);
         $this->assertStringContainsString('$app->usePublicPath($publicPath);', $bootstrap);
@@ -188,7 +187,7 @@ class DeploymentPackageBuilderTest extends TestCase
 
     public function test_installer_remove_o_ficheiro_hot_do_vite_em_producao(): void
     {
-        $installer = file_get_contents(resource_path('installer/installer.php.stub'));
+        $installer = file_get_contents(dirname((new \ReflectionClass(\Pcteckserv\CmsCore\Services\DeploymentPackageBuilder::class))->getFileName(), 3).'/resources/installer/installer.php.stub');
 
         $this->assertContains('public/hot', config('deploy.exclude'));
         $this->assertStringContainsString("\$publicPath.DIRECTORY_SEPARATOR.'hot'", $installer);
@@ -197,7 +196,7 @@ class DeploymentPackageBuilderTest extends TestCase
 
     public function test_installer_cria_superadministrador_sem_gravar_a_password_no_env(): void
     {
-        $installer = file_get_contents(resource_path('installer/installer.php.stub'));
+        $installer = file_get_contents(dirname((new \ReflectionClass(\Pcteckserv\CmsCore\Services\DeploymentPackageBuilder::class))->getFileName(), 3).'/resources/installer/installer.php.stub');
 
         $this->assertStringContainsString('name="admin_name"', $installer);
         $this->assertStringContainsString('name="admin_email"', $installer);
@@ -211,7 +210,7 @@ class DeploymentPackageBuilderTest extends TestCase
 
     public function test_installer_pede_e_grava_o_token_github_sem_o_expor_no_formulario(): void
     {
-        $installer = file_get_contents(resource_path('installer/installer.php.stub'));
+        $installer = file_get_contents(dirname((new \ReflectionClass(\Pcteckserv\CmsCore\Services\DeploymentPackageBuilder::class))->getFileName(), 3).'/resources/installer/installer.php.stub');
 
         $this->assertStringContainsString('name="cms_github_token" type="password"', $installer);
         $this->assertStringContainsString("'CMS_GITHUB_TOKEN' => \$githubToken", $installer);
@@ -221,7 +220,7 @@ class DeploymentPackageBuilderTest extends TestCase
 
     public function test_installer_pede_e_grava_dados_do_repositorio_starter(): void
     {
-        $installer = file_get_contents(resource_path('installer/installer.php.stub'));
+        $installer = file_get_contents(dirname((new \ReflectionClass(\Pcteckserv\CmsCore\Services\DeploymentPackageBuilder::class))->getFileName(), 3).'/resources/installer/installer.php.stub');
         $envExample = file_get_contents(base_path('.env.example'));
 
         $this->assertStringContainsString('name="starter_github_repository"', $installer);

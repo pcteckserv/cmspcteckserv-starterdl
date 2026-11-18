@@ -276,6 +276,14 @@ Rever as versões e o diff do lock e testar antes de publicar. Se ainda utilizar
 
 O projeto inclui a rota autenticada `/compilar` para gerar um pacote de instalação. O Core é incluído a partir da dependência instalada, sem sobreposição de uma pasta externa. O compilador inclui as origens dos plugins `path` no pacote de produção. O instalador escreve os novos URLs do Core e dos plugins no `.env` de produção; o token deve ter acesso aos dois repositórios.
 
+A implementação da compilação, do instalador e do reparador pertence ao Core.
+Este Starter requer uma versão publicada do Core que inclua esta funcionalidade;
+atualizar a dependência e rever a restrição Composer antes de publicar o site.
+Os sites em produção que conservem o compilador antigo passam automaticamente
+a usar as rotas do Core após a atualização, mesmo com uma cache de rotas antiga.
+As opções por defeito são fornecidas pela package; `config/deploy.php` é opcional
+e serve apenas para personalizações do site.
+
 Antes de publicar, executar o build e a suite de testes, configurar o ambiente de produção com `APP_ENV=production`, `APP_DEBUG=false`, HTTPS e credenciais próprias, e apontar o servidor para `public/`. Preservar a `APP_KEY` nas atualizações. Configurar os consumidores das filas e o agendamento no servidor quando necessários. Não utilizar `php artisan serve` como servidor de produção.
 
 ## 10. Resolução de problemas

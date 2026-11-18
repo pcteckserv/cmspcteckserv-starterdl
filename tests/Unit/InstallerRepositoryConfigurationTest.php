@@ -21,7 +21,7 @@ class InstallerRepositoryConfigurationTest extends TestCase
 
         $this->directory = sys_get_temp_dir().'/cms-installer-'.bin2hex(random_bytes(8));
         mkdir($this->directory.'/public', 0755, true);
-        $installer = file_get_contents(dirname(__DIR__, 2).'/resources/installer/installer.php.stub');
+        $installer = file_get_contents(dirname((new \ReflectionClass(\Pcteckserv\CmsCore\Services\DeploymentPackageBuilder::class))->getFileName(), 3).'/resources/installer/installer.php.stub');
         file_put_contents($this->directory.'/public/installer.php', str_replace('{{ application_archive_name }}', 'application.zip', $installer));
 
         $zip = new ZipArchive;

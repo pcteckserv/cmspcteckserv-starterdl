@@ -38,3 +38,5 @@ Ao terminar, selecione **Terminar e desativar reparador** e elimine o ficheiro P
 - O reparador não descarta alterações locais no Git. Uma falha de permissões, autenticação, compatibilidade ou ficheiros modificados é apresentada para diagnóstico.
 - Cada operação tem um limite de 300 segundos. Limites inferiores do servidor web ou do alojamento também se aplicam. Após uma interrupção, verifique o estado antes de repetir.
 - A ferramenta não atualiza o código para uma versão diferente do lock de produção e não substitui automaticamente o código por uma cópia local.
+
+O compilador, o instalador e o reparador são fornecidos pela package `pcteckserv/cms-core`. As atualizações desta funcionalidade chegam através do Core.

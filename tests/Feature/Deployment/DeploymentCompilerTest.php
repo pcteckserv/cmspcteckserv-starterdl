@@ -3,7 +3,7 @@
 namespace Tests\Feature\Deployment;
 
 use App\Models\User;
-use App\Services\DeploymentPackageBuilder;
+use Pcteckserv\CmsCore\Services\DeploymentPackageBuilder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Facades\Storage;

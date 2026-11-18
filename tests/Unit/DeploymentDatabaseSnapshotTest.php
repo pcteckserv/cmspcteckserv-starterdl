@@ -2,7 +2,7 @@
 
 namespace Tests\Unit;
 
-use App\Services\Deployment\DatabaseSnapshot;
+use Pcteckserv\CmsCore\Services\Deployment\DatabaseSnapshot;
 use Illuminate\Encryption\Encrypter;
 use PDO;
 use PHPUnit\Framework\TestCase;

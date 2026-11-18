@@ -2,7 +2,7 @@
 
 namespace Tests\Unit;
 
-use App\Services\Deployment\DatabaseSnapshot;
+use Pcteckserv\CmsCore\Services\Deployment\DatabaseSnapshot;
 use Dotenv\Dotenv;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Filesystem\Filesystem;
@@ -248,13 +248,13 @@ class DeploymentInstallerImportTest extends TestCase
             file_put_contents($public.'/plugins.json', json_encode([$plugin], JSON_THROW_ON_ERROR));
             $files[] = 'plugins.json';
         }
-        copy(dirname(__DIR__, 2).'/app/Services/Deployment/DatabaseSnapshot.php', $public.'/deployment-runtime.php');
+        copy((new \ReflectionClass(DatabaseSnapshot::class))->getFileName(), $public.'/deployment-runtime.php');
         $files[] = 'deployment-runtime.php';
         $manifest = ['format' => 2, 'components' => $components, 'files' => [], 'media' => ['root' => 'storage/app/public', 'directory' => 'cms/media']];
         foreach ($files as $file) {
             $manifest['files'][$file] = hash_file('sha256', $public.'/'.$file);
         }
-        $stub = file_get_contents(dirname(__DIR__, 2).'/resources/installer/installer.php.stub');
+        $stub = file_get_contents(dirname((new \ReflectionClass(\Pcteckserv\CmsCore\Services\DeploymentPackageBuilder::class))->getFileName(), 3).'/resources/installer/installer.php.stub');
         file_put_contents($public.'/installer.php', str_replace(['{{ application_archive_name }}', '{{ deployment_manifest }}'], ['application.zip', base64_encode(json_encode($manifest))], $stub));
     }
 

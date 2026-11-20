@@ -1,0 +1,174 @@
+Quero que desenvolvas um Editor de conteúdo para este projeto, integrado na área administrativa existente do CMS.
+
+O objetivo é permitir que uma pessoa sem conhecimentos técnicos consiga editar os conteúdos do site, preservando o design, a estrutura das páginas e as funcionalidades existentes.
+
+1. ANALISAR O PROJETO ANTES DE IMPLEMENTAR
+
+Lê o AGENTS.md da raiz e todas as instruções aplicáveis aos diretórios envolvidos.
+
+Analisa:
+- A separação entre Site, Core, Starter e Plugins.
+- O layout administrativo, a navegação e as permissões existentes.
+- As páginas públicas, os respetivos templates e componentes.
+- Os mecanismos existentes para configurações, media, ícones e texto formatado.
+- Os testes e os comandos de validação do projeto.
+
+Identifica os textos, imagens, ícones, ligações e listas que devem ser editáveis em cada página.
+
+Antes de alterar código, apresenta um resumo breve das páginas e secções identificadas e da abordagem que vais seguir. Avança autonomamente dentro do âmbito autorizado. Se forem necessárias alterações ao Core, Starter ou Plugins que exijam autorização pelas instruções do projeto, explica a necessidade e aguarda essa autorização.
+
+Não copies implementações de outros projetos sem analisar os padrões deste projeto.
+
+2. ESTRUTURA DO EDITOR
+
+Adiciona uma entrada «Editor de conteúdo» no menu administrativo, com duas áreas:
+
+Geral:
+- Conteúdos partilhados pelo site.
+- Logótipos do cabeçalho e rodapé.
+- Mensagem da barra superior, se existir.
+- Redes sociais.
+- Moradas e contactos.
+- Outros conteúdos globais efetivamente presentes no projeto.
+
+Páginas:
+- Lista das páginas públicas de conteúdo.
+- Nome da página, endereço público e ação «Editar».
+- Editor próprio para cada página disponível.
+
+Adapta esta organização ao site real. Não cries campos ou funcionalidades sem correspondência no projeto.
+
+3. EDIÇÃO DAS PÁGINAS
+
+Organiza o editor por secções, seguindo a ordem em que aparecem na página pública.
+
+Para cada secção, disponibiliza os campos adequados:
+- Textos simples para títulos, subtítulos e labels.
+- Áreas de texto para descrições.
+- Texto formatado apenas onde existir necessidade real.
+- Seletores de imagens através do Media Manager.
+- Seletores de ícones através da biblioteca existente.
+- Texto e destino dos botões.
+- Texto alternativo das imagens.
+- Listas editáveis para conteúdos repetidos, quando fizer sentido.
+
+Distingue a edição de conteúdos da alteração do layout. Mantém a composição visual existente e evita introduzir um construtor livre de páginas.
+
+Quando existirem produtos, artigos, formulários ou outras entidades geridas por módulos próprios, reutiliza os mecanismos desses módulos. O editor pode selecionar conteúdos ou editar a sua apresentação, sem duplicar a respetiva gestão.
+
+4. EXPERIÊNCIA DE UTILIZAÇÃO
+
+Reutiliza o design administrativo e os componentes existentes.
+
+Inclui:
+- Navegação entre secções.
+- Secções recolhíveis.
+- Botão «Guardar alterações» facilmente acessível.
+- Ligação «Ver página publicada».
+- Mensagens de sucesso e erros claros.
+- Identificação dos campos inválidos.
+- Preservação dos valores introduzidos após erros de validação.
+- Aviso ao sair com alterações por guardar.
+- Pré-visualização das imagens selecionadas.
+- Indicação das dimensões recomendadas.
+- Possibilidade de remover uma imagem personalizada e repor a original.
+- Adicionar, remover e reordenar elementos das listas, com limites adequados.
+
+Mantém uma navegação simples, sem barras de deslocamento interiores desnecessárias. Garante utilização em computador e telemóvel, labels acessíveis e navegação por teclado.
+
+Explica na interface quando as alterações ficam publicadas. Por defeito, guardar deve publicar imediatamente, salvo se o projeto já tiver um fluxo de rascunho e publicação.
+
+Todos os textos devem estar em Português de Portugal e UTF-8.
+
+5. CORES E TEXTO FORMATADO
+
+Se for compatível com o design, permite personalizar a cor dos textos visíveis individualmente:
+- Aceita apenas cores hexadecimais válidas.
+- Disponibiliza «Repor cor do tema».
+- Aplica cada personalização apenas ao conteúdo correspondente.
+- Preserva as cores existentes quando um pedido não incluir esse campo.
+
+Não disponibilizes CSS arbitrário.
+
+Para páginas legais ou documentos extensos, considera um único editor de texto formatado, com títulos, parágrafos, listas, negrito, itálico e ligações.
+
+Reutiliza o editor existente. Sanitiza o HTML no backend com uma lista explícita de elementos e atributos permitidos. A proteção do editor no browser não substitui a sanitização no servidor.
+
+6. ARQUITETURA E PERSISTÊNCIA
+
+Reutiliza o mecanismo de configurações existente, como SiteOption, quando adequado.
+
+Define os campos, secções, limites e valores predefinidos de forma organizada. Utiliza os conteúdos atuais como valores predefinidos, preservando o aspeto e o conteúdo do site antes da primeira edição.
+
+Distingue:
+- Configuração dos campos e secções.
+- Validação dos pedidos.
+- Leitura e gravação.
+- Preparação do conteúdo para apresentação pública.
+- Templates administrativos e públicos.
+
+Mantém controllers simples e evita lógica de negócio nas views.
+
+Reutiliza componentes para campos, seletores e listas. Coloca JavaScript e estilos em módulos próprios.
+
+Mantém os conteúdos e personalizações deste cliente no site. Reutiliza as APIs e os pontos de extensão do Core e dos Plugins, sem modificar vendor nem duplicar a implementação interna das packages.
+
+7. SEGURANÇA E INTEGRIDADE
+
+Utiliza autenticação Laravel e permissões distintas para:
+- Consultar o editor.
+- Alterar os conteúdos.
+
+Utilizadores com permissão apenas de consulta devem conseguir visualizar os conteúdos, sem poder gravar alterações.
+
+Aplica autorização e validação no backend a todas as operações.
+
+Valida:
+- Tipos, formatos e comprimentos.
+- Chaves permitidas nos objetos e listas.
+- Quantidade máxima de elementos.
+- Imagens existentes, públicas, do tipo correto e não eliminadas.
+- Ícones pertencentes ao catálogo permitido.
+- Entidades selecionadas e respetiva disponibilidade pública.
+- Ligações internas, âncoras e URLs externas com protocolos seguros.
+
+Utiliza CSRF, dados validados e escaping apropriado. Rejeita ligações perigosas, HTML executável e atributos não autorizados.
+
+Usa transações para alterações relacionadas que devam ser atómicas.
+
+Analisa o comportamento de formulários antigos e edições simultâneas. Evita que campos não editados revertam alterações mais recentes, especialmente nos seletores de ícones.
+
+Editar uma página não deve alterar conteúdos de outras páginas ou configurações dos módulos associados.
+
+8. TESTES E VALIDAÇÃO
+
+Cria ou atualiza testes para:
+- Acesso de visitantes e utilizadores sem permissão.
+- Consulta sem possibilidade de edição.
+- Gravação e apresentação dos conteúdos no site.
+- Preservação dos conteúdos originais sem configurações guardadas.
+- Campos inválidos, ausentes ou manipulados.
+- Imagens privadas, eliminadas ou de tipo incorreto.
+- Ligações inseguras e tentativas de XSS.
+- Remoção e reposição de imagens e cores.
+- Listas vazias, ordenação e limites.
+- Isolamento entre páginas.
+- Regressões relevantes de concorrência e compatibilidade.
+
+Executa os testes específicos e a suite completa conforme as instruções do projeto.
+
+Quando possível, verifica o editor no browser em computador e telemóvel, incluindo navegação, seletores, erros, gravação e deslocamento da página.
+
+9. ENTREGA
+
+Implementa a solução completa dentro do âmbito autorizado.
+
+No final, indica:
+- Ficheiros criados, modificados ou eliminados.
+- Funcionalidades implementadas.
+- Proteções de segurança aplicadas.
+- Testes criados ou atualizados.
+- Comandos de testes executados e resultados.
+- Limitações ou pontos não validados.
+
+Não declares verificações que não tenham sido realizadas.
